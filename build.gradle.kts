@@ -5,6 +5,7 @@ import cn.hutool.setting.Setting
 
 plugins {
     id("com.tddworks.central-portal-publisher") version "0.0.5"
+    id("com.github.hierynomus.license") version "0.15.0"
     base
     signing
 }
@@ -44,6 +45,10 @@ subprojects {
     apply(plugin = "signing")
 }
 
+license {
+    headerURI = file("LICENSE").toURI()
+}
+
 var mavenFile = file("center-maven.json")
 var createObj: JSONObject;
 if (!mavenFile.exists()) {
@@ -63,6 +68,7 @@ if (!mavenFile.exists()) {
 }
 
 var s = Setting(file(".git/config").absolutePath)
+FileUtil.readUtf8String(file(".git/HEAD")).replace("ref: refs/heads/", "")
 println()
 
 allprojects {
