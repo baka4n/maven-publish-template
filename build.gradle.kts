@@ -65,6 +65,25 @@ file.bufferedReader(Charsets.UTF_8).use {
     mavenToml = JSONUtil.parseObj(readTree.toPrettyString())
 }
 
+var center = mavenToml.getJSONObject("center")
+var signToml = mavenToml.getJSONObject("center")
+setProperty("mavenCentralUsername", center.getStr("username"))
+setProperty("mavenCentralPassword", center.getStr("password"))
+setProperty("signing.keyId", signToml.getStr("keyId"))
+setProperty("signing.password", signToml.getStr("password"))
+setProperty("signing.secretKeyRingFile", signToml.getStr("secretKeyRingFile"))
+
+subprojects {
+    apply(plugin = "maven-publish")
+    apply(plugin = "base")
+    apply(plugin = "com.vanniktech.maven.publish")
+    apply(plugin = "java-library")
+
+    base {
+        archivesName = "${rootProject.base.archivesName.get()}-$name"
+    }
+}
+
 
 
 allprojects {
@@ -109,16 +128,3 @@ allprojects {
         }
     }
 }
-
-
-
-subprojects {
-    apply(plugin = "maven-publish")
-    apply(plugin = "base")
-    apply(plugin = "com.vanniktech.maven.publish")
-
-    base {
-        archivesName = "${rootProject.base.archivesName.get()}-$name"
-    }
-}
-
