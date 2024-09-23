@@ -1,9 +1,12 @@
 .gradle
 **/build/
 !src/**/build/
+.idea/
 
 # Ignore Gradle GUI config
 gradle-app.setting
+
+maven.toml
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
