@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil
 import cn.hutool.setting.Setting
 import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import com.vanniktech.maven.publish.SonatypeHost
+import java.util.Properties
 
 
 plugins {
@@ -16,16 +17,38 @@ plugins {
     signing
 }
 
-val mavenGroup: String by rootProject
-val projectVersion: String by rootProject
-val projName: String by rootProject
-val projDescription: String by rootProject
-group = mavenGroup
-version = projectVersion
-description = projDescription
+val buildPropertiesPath = file("gradle/ext/build.properties")
+val buildProperties = Properties()
+if (buildPropertiesPath.exists().not()) {
+    buildProperties.put("mavenGroup", "io.github.baka4n")
+    buildPropertiesPath.bufferedWriter(Charsets.UTF_8).use {
+        buildProperties.store(it, "gradle.properties manager")
+    }
+} else {
+    buildPropertiesPath.bufferedReader(Charsets.UTF_8).use {
+        buildProperties.load(it)
+    }
+}
 
-base {
-    archivesName = name
+fun Properties.nullPut(key: String, file: File, value: Any, title: String) : String {
+    if (containsKey(key).not()) {
+        put(key, value)
+        file.bufferedWriter(Charsets.UTF_8).use {
+            store(it, title)
+        }
+    }
+    return getProperty(key)
+}
+
+allprojects {
+    project.group = buildProperties.getProperty("mavenGroup")
+    val versionTemp = if (project == rootProject) "${project.name}.version" else "${rootProject.name}.${project.name}.version"
+    val descriptionTemp = if (project == rootProject) "${project.name}.description" else "${rootProject.name}.${project.name}.description"
+    project.version =buildProperties.nullPut(versionTemp, buildPropertiesPath, "1.0.0.0", "gradle.properties manager")
+    project.description =buildProperties.nullPut(descriptionTemp, buildPropertiesPath, project.name, "gradle.properties manager")
+    base {
+        archivesName = if (project == rootProject) project.name  else "${rootProject.name}-${project.name}"
+    }
 }
 
 buildscript {
@@ -67,11 +90,6 @@ file.bufferedReader(Charsets.UTF_8).use {
 
 var center = mavenToml.getJSONObject("center")
 var signToml = mavenToml.getJSONObject("center")
-setProperty("mavenCentralUsername", center.getStr("username"))
-setProperty("mavenCentralPassword", center.getStr("password"))
-setProperty("signing.keyId", signToml.getStr("keyId"))
-setProperty("signing.password", signToml.getStr("password"))
-setProperty("signing.secretKeyRingFile", signToml.getStr("secretKeyRingFile"))
 
 subprojects {
     apply(plugin = "maven-publish")
@@ -95,6 +113,8 @@ allprojects {
 
         }
     }
+
+
 
     mavenPublishing {
         publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
