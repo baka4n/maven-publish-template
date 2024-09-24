@@ -4,7 +4,6 @@ import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONObject
 import cn.hutool.json.JSONUtil
 import cn.hutool.setting.Setting
-import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import com.vanniktech.maven.publish.SonatypeHost
 import java.util.Properties
 
@@ -12,6 +11,7 @@ plugins {
     `java-library`
     id("com.github.hierynomus.license") version "0.15.0"
     id("com.vanniktech.maven.publish") version "0.29.0"
+    `maven-publish`
     base
     signing
 }
@@ -36,34 +36,24 @@ if (buildPropertiesPath.exists().not()) {
         buildProperties.load(it)
     }
 }
-allprojects {
-    project.group = buildProperties.getProperty("mavenGroup")
-    project.version =buildProperties
-        .nullPut(buildProperties
-            .getVersionKey(rootProject, project), buildPropertiesPath, "1.0.0.0", "gradle.properties manager")
-    project.description =buildProperties
-        .nullPut(buildProperties
-            .getDescriptionKey(rootProject, project), buildPropertiesPath, project.name, "gradle.properties manager")
-}
 
-allprojects {
-    base {
-        archivesName = getSubProjectName(rootProject)
-    }
-}
+
+
 
 var s = gitConfig
 var branch = gitBranch
 
 val repos =
     JSONUtil.parseObj(HttpUtil.get(s.get("remote \"origin\"", "url")
-            .replace(".git", "")
-            .replace("https://github.com/", "https://api.github.com/repos/"), Charsets.UTF_8))
+        .replace(".git", "")
+        .replace("https://github.com/", "https://api.github.com/repos/"), Charsets.UTF_8))
 var parse =
     LocalDateTimeUtil.parse(repos.getStr("created_at").replace("Z", "+0000"), "yyyy-MM-dd'T'HH:mm:ssZ")
 
 
-
+base {
+    archivesName = getSubProjectName(rootProject)
+}
 
 var mavenToml: JSONObject = read(file("maven.toml").copy(file(("gradle/template.toml"))))
 
@@ -71,15 +61,19 @@ var mavenToml: JSONObject = read(file("maven.toml").copy(file(("gradle/template.
 subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "base")
+    apply(plugin = "signing")
     apply(plugin = "com.vanniktech.maven.publish")
     apply(plugin = "java-library")
 
     base {
-        archivesName = "${rootProject.base.archivesName.get()}-$name"
+        archivesName = getSubProjectName(rootProject)
     }
 }
 
 
+allprojects {
+
+}
 
 allprojects {
     repositories {
@@ -91,13 +85,28 @@ allprojects {
         }
     }
 
+    project.group = buildProperties.getProperty("mavenGroup")
+    project.version =buildProperties
+        .nullPut(buildProperties
+            .getVersionKey(rootProject, project), buildPropertiesPath, "1.0.0.0", "gradle.properties manager")
+    project.description =buildProperties
+        .nullPut(buildProperties
+            .getDescriptionKey(rootProject, project), buildPropertiesPath, project.name, "gradle.properties manager")
+
+    signing {
+        useGpgCmd()
+        sign(publishing.publications)
+    }
+
     mavenPublishing {
-        publishToMavenCentral(SonatypeHost.DEFAULT, automaticRelease = true)
+        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
         coordinates(project.group.toString(), base.archivesName.get(), project.version.toString())
+        this.signAllPublications()
         pom {
             name = base.archivesName.get()
             description = project.description
             inceptionYear = parse.year.toString()
+            url = repos.getStr("html_url")
             licenses {
                 license {
                     name = mavenToml.getStr("license")
