@@ -63,20 +63,10 @@ var parse =
     LocalDateTimeUtil.parse(repos.getStr("created_at").replace("Z", "+0000"), "yyyy-MM-dd'T'HH:mm:ssZ")
 
 
-var file = file("maven.toml").apply {
-    if (!exists()) {
-        FileUtil.copyFile(file("gradle/template.toml"), this)
-    }
-}
 
-var mavenToml: JSONObject = JSONUtil.createObj()
-file.bufferedReader(Charsets.UTF_8).use {
-    val readTree = TomlMapper().readTree(it)
-    mavenToml = JSONUtil.parseObj(readTree.toPrettyString())
-}
 
-var center = mavenToml.getJSONObject("center")
-var signToml = mavenToml.getJSONObject("center")
+var mavenToml: JSONObject = read(file("maven.toml").copy(file(("gradle/template.toml"))))
+
 
 subprojects {
     apply(plugin = "maven-publish")

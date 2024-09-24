@@ -1,15 +1,5 @@
-
 license= "MIT"
 release="main"
-
-[sign]
-keyId=""
-password=""
-secretKeyRingFile=""
-
-[center]
-username = ""
-password = ""
 
 [[authors]]
 id = "baka4n"
