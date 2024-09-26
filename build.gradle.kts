@@ -1,11 +1,5 @@
-import cn.hutool.core.date.LocalDateTimeUtil
-import cn.hutool.core.io.FileUtil
-import cn.hutool.http.HttpUtil
 import cn.hutool.json.JSONObject
-import cn.hutool.json.JSONUtil
-import cn.hutool.setting.Setting
 import com.vanniktech.maven.publish.SonatypeHost
-import java.util.Properties
 
 plugins {
     `java-library`
@@ -17,20 +11,6 @@ plugins {
 }
 
 initGradleProperties()
-
-val gitConfig = Setting(project.rootProject.file(".git/config").absolutePath)
-val gitBranch = FileUtil.readUtf8String(project.rootProject.file(".git/HEAD")).replace("ref: refs/heads/", "").trim()
-
-var s = gitConfig
-var branch = gitBranch
-
-val repos =
-    JSONUtil.parseObj(HttpUtil.get(s.get("remote \"origin\"", "url")
-        .replace(".git", "")
-        .replace("https://github.com/", "https://api.github.com/repos/"), Charsets.UTF_8))
-var parse =
-    LocalDateTimeUtil.parse(repos.getStr("created_at").replace("Z", "+0000"), "yyyy-MM-dd'T'HH:mm:ssZ")
-
 
 base {
     archivesName = getSubProjectName(rootProject)
@@ -49,11 +29,6 @@ subprojects {
     base {
         archivesName = getSubProjectName(rootProject)
     }
-}
-
-
-allprojects {
-
 }
 
 allprojects {
@@ -86,13 +61,13 @@ allprojects {
         pom {
             name = base.archivesName.get()
             description = project.description
-            inceptionYear = parse.year.toString()
-            url = repos.getStr("html_url")
+            inceptionYear = getCreatedTime().year.toString()
+            url = getApiGithubJson().getStr("html_url")
             licenses {
                 license {
                     name = mavenToml.getStr("license")
-                    url = "${repos.getStr("svn_url")}/blob/$branch/LICENSE"
-                    description = "${repos.getStr("svn_url")}/blob/$branch/LICENSE"
+                    url = "${getApiGithubJson().getStr("svn_url")}/blob/${gitBranch()}/LICENSE"
+                    description = "${getApiGithubJson().getStr("svn_url")}/blob/${gitBranch()}/LICENSE"
                 }
             }
             developers {
@@ -106,9 +81,9 @@ allprojects {
                 }
             }
             scm {
-                url = repos.getStr("html_url")
-                connection = "scm:git:${repos.getStr("git_url")}"
-                developerConnection = "scm:git:ssh://${repos.getStr("ssh_url")}"
+                url = getApiGithubJson().getStr("html_url")
+                connection = "scm:git:${getApiGithubJson().getStr("git_url")}"
+                developerConnection = "scm:git:ssh://${getApiGithubJson().getStr("ssh_url")}"
             }
         }
     }
