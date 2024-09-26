@@ -18,27 +18,8 @@ plugins {
 
 initGradleProperties()
 
-var buildPropertiesPath = project.rootProject.file("gradle/ext/build.properties")
-val buildProperties = Properties()
-    .nullToCreate(buildPropertiesPath) {
-        put("mavenGroup", "io.github.baka4n")
-    }
 val gitConfig = Setting(project.rootProject.file(".git/config").absolutePath)
 val gitBranch = FileUtil.readUtf8String(project.rootProject.file(".git/HEAD")).replace("ref: refs/heads/", "").trim()
-
-if (buildPropertiesPath.exists().not()) {
-    buildProperties.put("mavenGroup", "io.github.baka4n")
-    buildPropertiesPath.bufferedWriter(Charsets.UTF_8).use {
-        buildProperties.store(it, "gradle.properties manager")
-    }
-} else {
-    buildPropertiesPath.bufferedReader(Charsets.UTF_8).use {
-        buildProperties.load(it)
-    }
-}
-
-
-
 
 var s = gitConfig
 var branch = gitBranch
@@ -85,13 +66,13 @@ allprojects {
         }
     }
 
-    project.group = buildProperties.getProperty("mavenGroup")
-    project.version =buildProperties
-        .nullPut(buildProperties
-            .getVersionKey(rootProject, project), buildPropertiesPath, "1.0.0.0", "gradle.properties manager")
-    project.description =buildProperties
-        .nullPut(buildProperties
-            .getDescriptionKey(rootProject, project), buildPropertiesPath, project.name, "gradle.properties manager")
+    project.group = buildProperties().getProperty("mavenGroup")
+    project.version =buildProperties()
+        .nullPut(buildProperties()
+            .getVersionKey(rootProject, project), getBuildProperties(), "1.0.0.0", "gradle.properties manager")
+    project.description =buildProperties()
+        .nullPut(buildProperties()
+            .getDescriptionKey(rootProject, project), getBuildProperties(), project.name, "gradle.properties manager")
 
     signing {
         useGpgCmd()
