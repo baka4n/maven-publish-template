@@ -43,11 +43,9 @@ allprojects {
 
     project.group = buildProperties().getProperty("mavenGroup")
     project.version =buildProperties()
-        .nullPut(buildProperties()
-            .getVersionKey(rootProject, project), getBuildProperties(), "1.0.0.0", "gradle.properties manager")
+        .nullPut(getVersionKey(), getBuildProperties(), "1.0.0.0", "gradle.properties manager")
     project.description =buildProperties()
-        .nullPut(buildProperties()
-            .getDescriptionKey(rootProject, project), getBuildProperties(), project.name, "gradle.properties manager")
+        .nullPut(getDescriptionKey(), getBuildProperties(), project.name, "gradle.properties manager")
 
     signing {
         useGpgCmd()

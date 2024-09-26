@@ -13,15 +13,15 @@ fun Properties.nullPut(key: String, file: File, value: Any, title: String) : Str
     return getProperty(key)
 }
 
-private fun Properties.getKey(rootProject: Project, project: Project, appendKey: String): String {
-    return if (project == rootProject) "${project.name}.${appendKey}" else "${rootProject.name}.${project.name}.${appendKey}"
+private fun Project.getKey(appendKey: String): String {
+    return if (this == rootProject) "${name}.${appendKey}" else "${rootProject.name}.${name}.${appendKey}"
 }
 
-fun Properties.getVersionKey(rootProject: Project, project: Project): String {
-    return getKey(rootProject, project, "version")
+fun Project.getVersionKey(): String {
+    return getKey("version")
 }
-fun Properties.getDescriptionKey(rootProject: Project, project: Project): String {
-    return getKey(rootProject, project, "description")
+fun Project.getDescriptionKey(): String {
+    return getKey("description")
 }
 
 fun Project.getSubProjectName(rootProject: Project): String {
@@ -44,7 +44,7 @@ fun Properties.nullToCreate(path: File, action: Action<Properties>): Properties 
 }
 
 fun Project.initGradleProperties() {
-    var file = this.rootProject.file("gradle.properties")
+    val file = this.rootProject.file("gradle.properties")
     if (file.exists().not()) {
         file.bufferedWriter(Charsets.UTF_8).use {
             val properties = Properties()
