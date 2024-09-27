@@ -60,21 +60,13 @@ fun Project.initGradleProperties() {
 
 }
 
-private val buildProperties = Properties()
-private var buildPropertiesPath: File? = null
 fun Project.buildProperties(): Properties {
-    if (buildProperties.isEmpty) {
-        return buildProperties
-            .nullToCreate(getBuildProperties()) {
-                put("mavenGroup", "io.github.baka4n")
-            }
-    }
-    return buildProperties
+    return Properties()
+        .nullToCreate(getBuildProperties()) {
+            put("mavenGroup", "io.github.baka4n")
+        }
 }
 
 fun Project.getBuildProperties(): File {
-    if (buildPropertiesPath == null) {
-        buildPropertiesPath = rootProject.file("gradle/ext/build.properties")
-    }
-    return buildPropertiesPath!!
+    return rootProject.file("gradle/ext/build.properties")
 }
