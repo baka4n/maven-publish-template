@@ -1,0 +1,103 @@
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+
+plugins {
+    id('base')
+    id("maven-publish")
+    id("signing")
+    id("java-library")
+    id("com.vanniktech.maven.publish")
+    id("com.github.hierynomus.license")
+}
+
+base {
+    archivesName = getSubProjectName(project, rootProject)
+}
+
+def getSubProjectName(Project project, Project rootProject) {
+    if (project == rootProject)
+        return name
+    else
+        return  "${rootProject.name}-${name}"
+}
+
+static def nullToCreate(Properties properties, java.nio.file.Path path, Action<Properties> action) {
+    if (!Files.exists(path)) {
+        action.execute(properties)
+        def writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)
+        properties.store(writer, "gradle.properties manager")
+        writer.close()
+    } else {
+        def reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)
+        properties.load(reader)
+    }
+    return properties
+}
+
+static def buildProperties(Project project) {
+    return nullToCreate(new Properties(),getBuildProperties(project.rootProject), it -> {
+        it.put("mavenGroup", "io.github.baka4n")
+    })
+}
+
+static def getBuildProperties(Project rootProject) {
+    return rootProject.file("gradle/ext/build.properties").toPath()
+}
+
+static def nullPut(Properties properties, String key, java.nio.file.Path path, Object value, String title) {
+    if (!properties.containsKey(key)) {
+        properties.put(key, value)
+        def writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)
+        properties.store(writer, title)
+
+    }
+    return properties.getProperty(key)
+}
+
+static def getKey(Project project, String appendKey) {
+    if (project == project.rootProject)
+        return "${project.name}.${appendKey}"
+    else
+        return "${project.rootProject.name}.${project.name}.${appendKey}"
+
+}
+
+static def getVersionKey(Project project) {
+    return getKey(project,"version")
+}
+static def getDescriptionKey(Project project) {
+    return getKey(project, "description")
+}
+
+subprojects {
+    apply plugin: "base"
+    apply plugin: "maven-publish"
+    apply plugin: "signing"
+    apply plugin: "java-library"
+    apply plugin: "com.vanniktech.maven.publish"
+    base {
+        archivesName = getSubProjectName(project, rootProject)
+    }
+}
+
+def buildProperties = buildProperties(project)
+def buildPath = getBuildProperties(rootProject)
+allprojects {
+
+    project.group = buildProperties.getProperty("mavenGroup")
+    project.version = nullPut(buildProperties, getVersionKey(project), buildPath, "1.0.0.0", "gradle.properties manager")
+    project.description = nullPut(buildProperties, getDescriptionKey(project), buildPath, project.name, "gradle.properties manager")
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url = "https://central.sonatype.com/api/v1/publisher/deployments/download/"
+        }
+    }
+
+    signing {
+        useGpgCmd()
+        sign(publishing.publications)
+    }
+}
