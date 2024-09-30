@@ -133,6 +133,28 @@ def buildProperties = buildProperties(project)
 def buildPath = getBuildProperties(rootProject)
 def mavenToml = read(copy(file("maven.toml").toPath(), file("gradle/template.toml").toPath()))
 def gitApiJson = getApiGithubJson(project)
+
+def path = rootProject.file("LICENSE").toPath()
+List<JSONObject> authors = (mavenToml.getJSONArray("authors") as List<JSONObject>)
+def sb = new StringBuilder()
+def iterator = authors.iterator()
+if (iterator.hasNext()) {
+    sb.append(iterator.next().getStr("id"))
+}
+while (iterator.hasNext()) {
+    sb.append(", ").append(iterator.next().getStr("id"))
+}
+try(
+        def writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)
+        def reader = Files.newBufferedReader(rootProject.file("licenses/${mavenToml.getStr("license")}.template").toPath())
+) {
+
+    reader.lines().forEach {
+        writer.writeLine(it.replace("<year>", (getCreatedTime(project).year + 3).toString()).replace("<authors>", sb.toString()))
+    }
+}
+
+
 allprojects {
 
     project.group = buildProperties.getProperty("mavenGroup")
@@ -169,7 +191,7 @@ allprojects {
                 }
             }
             developers {
-                for (final JSONObject o in (mavenToml.getJSONArray("authors") as List<JSONObject>)) {
+                for (final JSONObject o in authors) {
                     developer {
                         id = o.getStr("id")
                         name = o.getStr("name")
