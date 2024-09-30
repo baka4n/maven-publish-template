@@ -134,6 +134,13 @@ def buildPath = getBuildProperties(rootProject)
 def mavenToml = read(copy(file("maven.toml").toPath(), file("gradle/template.toml").toPath()))
 def gitApiJson = getApiGithubJson(project)
 
+def readme = rootProject.file("README.MD").toPath()
+if (Files.notExists(readme)) {
+    try(def bw = Files.newBufferedWriter(readme, StandardCharsets.UTF_8)) {
+        bw.writeLine(gitApiJson.getStr("description"))
+    }
+}
+
 def path = rootProject.file("LICENSE").toPath()
 List<JSONObject> authors = (mavenToml.getJSONArray("authors") as List<JSONObject>)
 def sb = new StringBuilder()
