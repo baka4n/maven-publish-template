@@ -26,13 +26,12 @@ repositories {
     }
 }
 
-
 dependencies {
     implementation(gradleApi())
-    implementation("cn.hutool:hutool-json:5.8.31")
+    implementation("cn.hutool:hutool-json:5.8.32")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.17.2")
-    implementation("cn.hutool:hutool-setting:5.8.31")
-    implementation("cn.hutool:hutool-http:5.8.31")
+    implementation("cn.hutool:hutool-setting:5.8.32")
+    implementation("cn.hutool:hutool-http:5.8.32")
     implementation("com.vanniktech:gradle-maven-publish-plugin:0.29.0")
     implementation("gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.16.1")
 }

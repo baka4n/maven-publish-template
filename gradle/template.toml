@@ -1,5 +1,6 @@
 license= "unlicense"
 release="main"
+using-minecraft=true
 
 [[authors]]
 id = "baka4n"
