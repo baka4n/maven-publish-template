@@ -1,7 +1,7 @@
 import java.util.Properties
 
 var settingsPropertiesPath = file("gradle/ext/settings.properties")
-
+settingsPropertiesPath.parentFile.mkdirs()
 var settingsProperties = Properties()
 if (settingsPropertiesPath.exists().not()) {
     settingsProperties.put("projName", "maven-publish-template")
