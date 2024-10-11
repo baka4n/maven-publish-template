@@ -18,6 +18,7 @@ if (file.exists()) {
     settingsProperites.put("minecraft.version", "1.21")
     settingsProperites.put("parchment.mapping", "2024.07.28")
     settingsProperites.put("neo.form.version", "1.21-20240613.152323")
+    settingsProperites.put("common.injects", "")
     file.bufferedWriter(Charsets.UTF_8).use {
         settingsProperites.store(it, "Minecraft Development Settings")
     }
