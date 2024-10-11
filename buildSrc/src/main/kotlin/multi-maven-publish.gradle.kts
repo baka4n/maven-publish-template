@@ -48,6 +48,10 @@ s.gitBranch = gitBranch()
 readmeCreate()
 licenseGeneration()
 
+if (s.mavenToml.getBool("usingMinecraft", false)) {
+    apply(plugin= "multi-mc-development")
+}
+
 allprojects {
     project.group = s.buildProperties.getProperty("mavenGroup")
     project.version = s.buildProperties.nullPut(getVersionKey(), s.buildPropertiesPath, "1.0.0.0", "gradle.properties manager")
@@ -56,8 +60,15 @@ allprojects {
         mavenCentral()
         mavenLocal()
         maven {
-            url = uri("https://central.sonatype.com/api/v1/publisher/deployments/download/")
+            url = uri("https://maven.parchmentmc.org/")
         }
+        maven {
+            url = uri("https://maven.neoforged.net/releases")
+        }
+        maven {
+            url = uri("https://repo.spongepowered.org/repository/maven-public")
+        }
+
     }
 
     signing {
