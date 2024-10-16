@@ -147,10 +147,13 @@ fun Project.licenseGeneration() {
         sb.append(", ").append(iterator.next().getStr("id"))
     }
     LICENSE.bufferedWriter(Charsets.UTF_8).use { writer ->
-        rootProject.file("licenses/${s.mavenToml.getStr("license")}.template").bufferedReader(Charsets.UTF_8).use { reader ->
-            reader.lines().forEach {
-                writer.appendLine(it.replace("<year>", (getCreatedTime().year + 3).toString()).replace("<authors>", sb.toString()))
+        val jsonTarget = rootProject.file("licenses.json")
+        for (line in JSONUtil.readJSONObject(jsonTarget, Charsets.UTF_8)
+            .getStr("${s.mavenToml.getStr("license")}.template", "").lines()) {
+            for (char in line.chars()) {
+                writer.append((char -114514).toChar())
             }
+            writer.newLine()
         }
     }
 }
