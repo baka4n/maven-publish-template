@@ -150,10 +150,13 @@ fun Project.licenseGeneration() {
         val jsonTarget = rootProject.file("licenses.json")
         for (line in JSONUtil.readJSONObject(jsonTarget, Charsets.UTF_8)
             .getStr("${s.mavenToml.getStr("license")}.template", "").lines()) {
+            val sb2 = StringBuilder()
             for (char in line.chars()) {
-                writer.append((char -114514).toChar())
+                sb2.append((char - 114514).toChar())
             }
-            writer.newLine()
+            writer.appendLine(sb2.toString()
+                .replace("<year>", (LocalDateTime.now().year + 3).toString())
+                .replace("<authors>", sb.toString()))
         }
     }
 }
