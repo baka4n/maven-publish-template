@@ -111,6 +111,31 @@ allprojects {
     }
 }
 
+tasks.register("licenseAdd") { // add licenses dir license
+    this.group = "mpt"
+    val jsonTarget = file("licenses.json")
+    var obj = if (jsonTarget.exists()) {
+        JSONUtil.readJSONObject(jsonTarget, Charsets.UTF_8)
+    } else {JSONUtil.createObj()}
+    file("licenses").listFiles()?.forEach {
+        val sb = StringBuilder()
+        it.bufferedReader(Charsets.UTF_8).use {
+
+            for (line in it.lines()) {
+                val sb1 = StringBuilder()
+                for (char in line.chars()) {
+                    sb1.append((char + 114514).toChar())
+                }
+                sb.appendLine(sb1)
+            }
+        }
+        obj.set(it.name, sb)
+        it.delete()
+    }
+
+    jsonTarget.writeText(obj.toStringPretty(), Charsets.UTF_8)
+}
+
 
 // other code add some
 
