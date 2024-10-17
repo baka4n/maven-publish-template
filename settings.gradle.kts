@@ -16,3 +16,9 @@ if (settingsPropertiesPath.exists().not()) {
 
 
 rootProject.name = settingsProperties.getProperty("projName")
+
+settingsProperties.getProperty("include.projects").split(",").forEach {
+    if (it.isNotEmpty()) {
+        include(it)
+    }
+}
