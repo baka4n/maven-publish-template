@@ -23,7 +23,7 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation("net.fabricmc:fabric-loom:1.8-SNAPSHOT")
-    implementation("net.neoforged:moddev-gradle:2.0.36-beta")
+    implementation("net.neoforged:moddev-gradle:1.0.21")
     implementation("net.minecraftforge.gradle:ForgeGradle:6.0.29")
 }
 

@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     dependencies {
-        classpath("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.17.2")
+        classpath("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.18.0")
         classpath("cn.hutool:hutool-json:5.8.32")
     }
 }
@@ -54,11 +54,11 @@ tasks.withType<KotlinCompile> {
 dependencies {
     implementation(gradleApi())
     implementation("cn.hutool:hutool-json:5.8.32")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.17.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.18.0")
     implementation("cn.hutool:hutool-setting:5.8.32")
     implementation("cn.hutool:hutool-http:5.8.32")
     implementation("cn.hutool:hutool-crypto:5.8.32")
-    implementation("com.vanniktech:gradle-maven-publish-plugin:0.29.0")
+    implementation("com.vanniktech:gradle-maven-publish-plugin:0.30.0")
     implementation("gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.16.1")
     if (parseObj.getBool("usingMinecraft", false)) {
         implementation(project(":minecraft"))
